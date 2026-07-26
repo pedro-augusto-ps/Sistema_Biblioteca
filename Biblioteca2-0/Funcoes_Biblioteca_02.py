@@ -2,6 +2,7 @@ from Classes_Biblioteca_02 import Biblioteca, Usuario
 from Visual import *
 from getpass import getpass
 from rich import print
+import sqlite3
 
 def escolha1_cadastrar_item(biblioteca_recebida):
     itens_disponiveis()     #Exibe os ITENS disponíveis
@@ -72,4 +73,5 @@ def escolha6_devolver(biblioteca_recebida):
             biblioteca_recebida.devolver(usuario, item)
     except:
         usuario_nao_encontrado() 
+
 

@@ -5,6 +5,9 @@ from getpass import getpass
 from Visual import *
 import json
 import os
+import sqlite3
+
+
 
 PASTA_ATUAL = os.path.dirname(os.path.abspath(__file__))        #Configura para ser DEFINITIVO
 CAMINHO_ITENS = os.path.join(PASTA_ATUAL, "itens.json")         #Configura para ser DEFINITIVO
@@ -198,8 +201,14 @@ class Biblioteca:
         if novo_item in self.itens:
             item_cadastrado()
         else:   
+            conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+            cursor = conexao.cursor()
             self.itens.append(novo_item)
-            self.salvar_itens(CAMINHO_ITENS)   #Salva o item no módulo JSON
+            cursor.execute("""INSERT INTO itens 
+            (titulo, autor, disponibilidade) VALUES
+            (?, ?, ?)""",
+            (novo_item.titulo, novo_item.autor, novo_item.disponibilidade))
+            conexao.commit()
 
     def cadastrar_revista(self, titulo, autor, disponibilidade):
         novo_item = Revista(titulo, autor, disponibilidade)
