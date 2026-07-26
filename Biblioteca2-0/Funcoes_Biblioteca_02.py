@@ -4,6 +4,9 @@ from getpass import getpass
 from rich import print
 import sqlite3
 
+conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+cursor = conexao.cursor()
+
 def escolha1_cadastrar_item(biblioteca_recebida):
     itens_disponiveis()     #Exibe os ITENS disponíveis
     escolha = escolha_item()
@@ -22,13 +25,13 @@ def escolha1_cadastrar_item(biblioteca_recebida):
 
 def escolha2_cadastrar_usuario(biblioteca_recebida):
     nome = insira_usuario() 
-    if nome in biblioteca_recebida.usuarios:  #Se o nome já está na lista da biblioteca
+    if nome in buscar_usuario(nome):
         usuario_cadastrado()
         return
     insira_senha() 
     senha = getpass("")
     usuario = Usuario(nome, senha, False)  #Cria um usuário
-    biblioteca_recebida.cadastrar_usuario(usuario, "usuarios.json")  #Cadastra ele na biblioteca
+    biblioteca_recebida.cadastrar_usuario(usuario)  #Cadastra ele na biblioteca
 
 def escolha3_exibir_informações(biblioteca_recebida):
     procurado = insira_usuario()
@@ -75,3 +78,10 @@ def escolha6_devolver(biblioteca_recebida):
         usuario_nao_encontrado() 
 
 
+def buscar_usuario(nome):
+    try:
+        cursor.execute("SELECT nome FROM usuarios WHERE nome = ?", (nome,)) #Executa a busca do nome. vírgula por obrigação do SQLITE
+        resultado = cursor.fetchone()[0] #[0] Pois vai retornar STR da tupla encontrada
+        return resultado
+    except TypeError:
+        return None

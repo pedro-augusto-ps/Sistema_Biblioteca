@@ -215,12 +215,25 @@ class Biblioteca:
         if novo_item in self.itens:
             item_cadastrado()
         else:
+            conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+            cursor = conexao.cursor()
             self.itens.append(novo_item)
-        self.salvar_itens(CAMINHO_ITENS)     #Salva o item no módulo JSON
+            cursor.execute("""INSERT INTO itens 
+            (titulo, autor, disponibilidade) VALUES
+            (?, ?, ?)""",
+            (novo_item.titulo, novo_item.autor, novo_item.disponibilidade))
+            conexao.commit()
 
-    def cadastrar_usuario(self, novo_usuario, caminho):
+    def cadastrar_usuario(self, novo_usuario):
+        conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+        cursor = conexao.cursor()
+        cursor.execute("""INSERT INTO usuarios
+        (nome, senha)VALUES
+        (?, ?)""",
+        (novo_usuario.nome, novo_usuario.checagem_senha))
+        conexao.commit()
         self.usuarios[novo_usuario.nome] = novo_usuario
-        self.salvar_itens(CAMINHO_USUARIOS)   #Caminho é fornecido no __main__
+
 
     def salvar_usuarios(self, caminho_user):
         lista_usuarios = [] #Lista para adicionar no final
