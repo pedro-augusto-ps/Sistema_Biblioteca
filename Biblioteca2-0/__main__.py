@@ -2,14 +2,8 @@ from Classes_Biblioteca_02 import *
 from Funcoes_Biblioteca_02 import *
 from rich import print, inspect
 import time
-import os
 
-pasta_atual = os.path.dirname(os.path.abspath(__file__))
-caminho_item = os.path.join(pasta_atual, "itens.json")
-caminho_user = os.path.join(pasta_atual, "usuarios.json")
 biblioteca_recebida = Biblioteca()
-biblioteca_recebida.carregar_itens(caminho_item)
-biblioteca_recebida.carregar_usuarios(caminho_user)
 
 menu_principal()
 while True:
