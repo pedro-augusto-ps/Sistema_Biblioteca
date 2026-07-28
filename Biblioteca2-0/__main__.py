@@ -5,9 +5,10 @@ import time
 
 biblioteca_recebida = Biblioteca()
 
+
 menu_principal()
 while True:
-    try:
+
         print("[white bold]Insira sua ação: [7] = MOSTRAR MENU[/]")
         escolha = int(input(""))
         if escolha == 1:
@@ -24,9 +25,6 @@ while True:
             escolha6_devolver(biblioteca_recebida)
         elif escolha == 7:
             menu_principal()
-        else:
-            invalido()
-    except:
-        invalido()
+
 
         

@@ -1,4 +1,4 @@
-from Classes_Biblioteca_02 import Biblioteca, Usuario
+from Classes_Biblioteca_02 import Biblioteca, Usuario, Livro, Revista
 from Visual import *
 from getpass import getpass
 from rich import print
@@ -8,18 +8,20 @@ conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
 cursor = conexao.cursor()
 
 def escolha1_cadastrar_item(biblioteca_recebida):
-    itens_disponiveis()     #Exibe os ITENS disponíveis
+    # itens_disponiveis()     #Exibe os ITENS disponíveis
     escolha = escolha_item()
     if escolha == 1:
         titulo = insira_titulo()
-        autor = insira_autor()
-        disponibilidade = True
-        biblioteca_recebida.cadastrar_livro(titulo, autor, disponibilidade) #Cria um livro
+        if buscar_item_completo(titulo) == None:    #Impede a criação de itens iguais
+            autor = insira_autor()
+            disponibilidade = True
+            biblioteca_recebida.cadastrar_livro(titulo, autor, disponibilidade, "Livro") #Cria um livro
     elif escolha == 2:
         titulo = insira_nome_revista()
-        autor = insira_autor()
-        disponibilidade = True
-        biblioteca_recebida.cadastrar_revista(titulo, autor, disponibilidade) #Cria uma revista
+        if buscar_item_completo(titulo) == None:    #Impede a criação de itens iguais
+            autor = insira_autor()
+            disponibilidade = True
+            biblioteca_recebida.cadastrar_revista(titulo, autor, disponibilidade, "Revista") #Cria uma revista
     else:
         invalido()
 
@@ -48,44 +50,62 @@ def escolha3_exibir_informações(biblioteca_recebida):
     except TypeError:
         usuario_nao_encontrado()        
 
-def escolha4_exibir_acervo(bibilioteca_recebida):
-    exibir_acervo_estilizado(bibilioteca_recebida)
+# def escolha4_exibir_acervo(bibilioteca_recebida):
+#     exibir_acervo_estilizado(bibilioteca_recebida)
 
 #----------------------RETIRAR----------------------#
+#FUNÇÕES DEVEM VALIDAR TUDO
 def escolha5_retirar(biblioteca_recebida):
-    exibir_acervo_estilizado(biblioteca_recebida)
+    # exibir_acervo_estilizado(biblioteca_recebida)
     usuario = insira_usuario()
     try:
-        buscar_usuario(usuario) #Busca o nome do usuario
-        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario)
-        usuario = Usuario(nome_usuario, senha_usuario)
-        try:
-            item = insira_item()
-            biblioteca_recebida.retirar(usuario, item)
-        except AttributeError:
-            item_nao_encontrado()
+        buscar_usuario(usuario) #Busca o nome do usuário no DB, como não pode ter nomes iguais na criação, não tem conflito
+        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario) 
+        usuario = Usuario(nome_usuario, senha_usuario) #Cria o objeto usuario,
+        insira_senha()
+        senha = getpass("")
+        usuario.verificar_senha(senha)
+        if senha:
+            try:
+                item = insira_item()
+                id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
+                if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
+                    item = Livro(titulo, autor, disponibilidade, tipo)  
+                else:
+                    item = Revista(titulo, autor, disponibilidade, tipo)
+                biblioteca_recebida.retirar(usuario, item) #Passando OBJETOS
+            except AttributeError:
+                item_nao_encontrado()
+        else:
+            senha_invalida()
     except:
         usuario_nao_encontrado()
 #----------------------RETIRAR----------------------#
 
-
+#----------------------DEVOLUÇÃO----------------------#
 def escolha6_devolver(biblioteca_recebida):
     usuario = insira_usuario()
     try:
-        buscar_usuario(usuario) #Busca o nome do usuario
-        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario)
-        usuario = Usuario(nome_usuario, senha_usuario) #TRANSFORMANDO EM OBJETO, DESFRAGMENTAÇÃO SEM ORM
-        print(f"ITENS RETIRADOS: ")                 #LISTAGEM DOS ITENS
-        for item in nome_usuario._itens_emprestados:#LISTAGEM DOS ITENS
-            print(item)                             #LISTAGEM DOS ITENS
-        try:
-            item = insira_item()
-            biblioteca_recebida.devolver(usuario, item)
-        except ValueError:
-            item_nao_encontrado()
-    except ValueError:
-        usuario_nao_encontrado() 
-
+        buscar_usuario(usuario) #Busca o nome do usuário no DB, como não pode ter nomes iguais na criação, não tem conflito
+        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario) 
+        usuario = Usuario(nome_usuario, senha_usuario) #Cria o objeto usuario,
+        insira_senha()
+        senha = getpass("")
+        usuario.verificar_senha(senha)
+        if senha:
+                item = insira_item()
+                id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
+                conexao.execute("""SELECT id_item FROM item WHERE""")
+                if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
+                    item = Livro(titulo, autor, disponibilidade, tipo)  
+                else:
+                    item = Revista(titulo, autor, disponibilidade, tipo)
+                biblioteca_recebida.retirar(usuario, item) #Passando OBJETOS 
+        else:
+            senha_invalida()
+    except:
+        usuario_nao_encontrado()
+#----------------------DEVOLUÇÃO----------------------#
 
 
 def buscar_usuario(nome):
@@ -102,6 +122,9 @@ def buscar_usuario_completo(nome):
     return resultado
 
 def buscar_item_completo(item):
-    cursor.execute("SELECT * FROM itens WHERE titulo = ?", (item,))
-    resultado = cursor.fetchone()
-    return resultado
+    try:
+        cursor.execute("SELECT * FROM item WHERE titulo = ?", (item,))
+        resultado = cursor.fetchone()
+        return resultado
+    except TypeError:
+        return None

@@ -30,3 +30,9 @@ def criar_tabela_emprest():
 criar_tabela()
 criar_tabela_user()
 criar_tabela_emprest()
+
+ALTER TABLE itens RENAME COLUMN DISPONIBILIDADE TO DISPONIBILIDADE
+ALTER TABLE itens RENAME COLUMS id TO item_id
+ALTER TABLE itens RENAME TO item
+
+ALTER TABLE item ADD COLUMN tipo TEXT NOT NULL
