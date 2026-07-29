@@ -91,32 +91,49 @@ class Usuario:
             self.__senha_usuario = hashlib.sha256(nova_senha.encode('utf-8')).hexdigest()
          
 class Biblioteca:
-    """"REFORMULANDO"""
+    """"Esta classe possui apenas os métodos, antigamente na forma de JSON ela possuía atributos também,
+    É possível vizualizar as versões anteriores no commit final do meu GITHUB;
+    O método retirar e devolver, recebem OBJETOS: (usuario e item)
+    Cadastrar Livro e revista, recebem DADOS, o objeto é criado dentro do método
+    Essa é a classe "Principal" do código, pois grande parte das alterações
+    acontece aqui."""
 
+#----------------------RETIRAR----------------------#
     def retirar(self, usuario, item): 
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
-        cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))
-        id_usuario = cursor.fetchone()[0]
-        cursor.execute("SELECT id FROM itens WHERE titulo = ?", (item.titulo,))
-        id_item = cursor.fetchone()[0]
-        cursor.execute("""INSERT INTO emprestimos
+        cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,)) #Pega o ID do usuário
+        id_usuario = cursor.fetchone()[0]                                         #Pega o ID do usuário
+        cursor.execute("SELECT id FROM itens WHERE titulo = ?", (item.titulo,))   #Pega o id do item
+        id_item = cursor.fetchone()[0]                                            #Pega o id do item
+        cursor.execute("""INSERT INTO emprestimos 
         (usuario_ID, itens_ID) VALUES
-        (?, ?)""", (id_usuario, id_item,))
+        (?, ?)""", (id_usuario, id_item,))  #Cria um empréstimo
         cursor.execute("""UPDATE item
-        SET disponibilidade = 0
-        WHERE id = ?""", (id_item))
-        conexao.commit()
+        SET disponibilidade = 0     
+        WHERE id = ?""", (id_item)) 
+        conexao.commit()    #Muda a disponibilidade do item no DB
         #INÍCIO DA RETIRADA
         item.disponibilidade = False    #Item não está mais disponível.
         usuario._emprestimos += 1       #Soma um emprestimo no usuário
+#----------------------RETIRAR----------------------#
 
+#----------------------DEVOLUÇÃO--------------------#
     def devolver(self, usuario, item):
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
-        cursor.execute("""DELETE FROM emprestimos
-        WHERE """)
-
+        cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))  #Pega o ID do usuário
+        id_usuario = cursor.fetchone()[0]                                          #Pega o ID do usuário
+        cursor.execute("SELECT id FROM itens WHERE titulo = ?", (item.titulo,))    #Pega o id do item
+        id_item = cursor.fetchone()[0]                                             #Pega o id do item
+        cursor.execute("""DELETE FROM emprestimos                                  
+        WHERE (id_usuario,id_item) IN ((?, ?))""", (id_usuario, id_item))
+        conexao.commit()    #Deleta a ROW do empréstimo
+        cursor.execute("""UPDATE item
+        SET disponibilidade = 1
+        WHERE id = ?""", (id_item)) #Muda a disponibilidade do item no DB
+        usuario._emprestimos -= 1   #Tira um empréstimo do OBJETO usuário
+#----------------------DEVOLUÇÃO--------------------#
     def cadastrar_livro(self, titulo, autor, disponibilidade, tipo):
         novo_item = Livro(titulo, autor, disponibilidade, tipo)  
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")

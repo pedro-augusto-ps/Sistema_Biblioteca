@@ -6,29 +6,29 @@ import sqlite3
 
 conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
 cursor = conexao.cursor()
-cursor.execute("""ALTER TABLE emprestimos RENAME COLUMN itens_id TO id_item""")
 
 def escolha1_cadastrar_item(biblioteca_recebida):
     # itens_disponiveis()     #Exibe os ITENS disponíveis
     escolha = escolha_item()
     if escolha == 1:
         titulo = insira_titulo()
-        if buscar_item_completo(titulo) == None:    #Impede a criação de itens iguais
-            autor = insira_autor()
+        if buscar_item_completo(titulo) == None:    #Se é "None" então não existe item com este nome
+            autor = insira_autor()                  
             disponibilidade = True
-            biblioteca_recebida.cadastrar_livro(titulo, autor, disponibilidade, "Livro") #Não cria um livro
+            biblioteca_recebida.cadastrar_livro(titulo, autor, disponibilidade, "Livro") #Passa os dados, objeto ainda não foi criado
     elif escolha == 2:
         titulo = insira_nome_revista()
-        if buscar_item_completo(titulo) == None:    #Impede a criação de itens iguais
+        if buscar_item_completo(titulo) == None:    #Se é "None" então não existe item com este nome
             autor = insira_autor()
             disponibilidade = True
-            biblioteca_recebida.cadastrar_revista(titulo, autor, disponibilidade, "Revista") #Cria uma revista
+            biblioteca_recebida.cadastrar_revista(titulo, autor, disponibilidade, "Revista") #Passa os dados, objeto ainda não foi criado
     else:
         invalido()
-
+        return
+    
 def escolha2_cadastrar_usuario(biblioteca_recebida):
     nome = insira_usuario() 
-    if buscar_usuario(nome) == None:
+    if buscar_usuario(nome) == None:  #Se é "None" então não existe usuário com este nome
         insira_senha() 
         senha = getpass("")
         usuario = Usuario(nome, senha)  #Cria um usuário
@@ -45,7 +45,7 @@ def escolha3_exibir_informações(biblioteca_recebida):
         insira_senha()        
         senha = getpass("")
         if usuario.verificar_senha(senha) == True:  #Verifica a senha do usuário
-            exibir_informacoes(usuario)#Exibe as informaçoes do usuário
+            exibir_informacoes(usuario)             #Exibe as informaçoes do usuário
         else:
             senha_invalida()
     except TypeError:
@@ -61,12 +61,12 @@ def escolha5_retirar(biblioteca_recebida):
     usuario = insira_usuario()
     try:
         buscar_usuario(usuario) #Busca o nome do usuário no DB, como não pode ter nomes iguais na criação, não tem conflito
-        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario) 
+        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario) #Em ordem, pega as informações do usuário
         usuario = Usuario(nome_usuario, senha_usuario) #Cria o objeto usuario,
         insira_senha()
         senha = getpass("")
         usuario.verificar_senha(senha)
-        if senha:
+        if senha:    #Senha correta, então continue
             try:
                 item = insira_item()
                 id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
@@ -86,7 +86,7 @@ def escolha5_retirar(biblioteca_recebida):
         usuario_nao_encontrado()
 #----------------------RETIRAR----------------------#
 
-#----------------------DEVOLUÇÃO----------------------#
+#----------------------DEVOLUÇÃO--------------------#
 def escolha6_devolver(biblioteca_recebida):
     usuario = insira_usuario()
     try:
@@ -96,7 +96,7 @@ def escolha6_devolver(biblioteca_recebida):
         insira_senha()
         senha = getpass("")
         usuario.verificar_senha(senha)
-        if senha:
+        if senha:       #Senha correta, então continue
             if usuario._emprestimos < 3:
                 item = insira_item()
                 id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
@@ -113,8 +113,7 @@ def escolha6_devolver(biblioteca_recebida):
             senha_invalida()
     except:
         usuario_nao_encontrado()
-#----------------------DEVOLUÇÃO----------------------#
-
+#----------------------DEVOLUÇÃO--------------------#
 
 def buscar_usuario(nome):
     try:
