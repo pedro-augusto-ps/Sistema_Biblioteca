@@ -96,55 +96,46 @@ class Biblioteca:
     def retirar(self, usuario, item): 
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
-        if item.disponibilidade == True:        #VALIDAÇÃO: Item disponivél?
-            if usuario._emprestimos < 3:        #VALIDAÇÃO: Usuário tem -3 empréstimos?
-                cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))
-                id_usuario = cursor.fetchone()[0]
-                cursor.execute("SELECT id FROM itens WHERE titulo = ?", (item.titulo,))
-                id_item = cursor.fetchone()[0]
-                cursor.execute("""INSERT INTO emprestimos
-                (usuario_ID, itens_ID) VALUES
-                (?, ?)""", (id_usuario, id_item,))
-                conexao.commit()
-                #INÍCIO DA RETIRADA
-                item.disponibilidade = False          #Item não está mais disponível.
-                usuario._emprestimos += 1  #Soma um emprestimo no usuário
-            else:
-                emprestimo_excedente()
-        else:
-            item_indisponivel()    
-
+        cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))
+        id_usuario = cursor.fetchone()[0]
+        cursor.execute("SELECT id FROM itens WHERE titulo = ?", (item.titulo,))
+        id_item = cursor.fetchone()[0]
+        cursor.execute("""INSERT INTO emprestimos
+        (usuario_ID, itens_ID) VALUES
+        (?, ?)""", (id_usuario, id_item,))
+        cursor.execute("""UPDATE item
+        SET disponibilidade = 0
+        WHERE id = ?""", (id_item))
+        conexao.commit()
+        #INÍCIO DA RETIRADA
+        item.disponibilidade = False    #Item não está mais disponível.
+        usuario._emprestimos += 1       #Soma um emprestimo no usuário
 
     def devolver(self, usuario, item):
-        "Manutençao"
-            
-    def cadastrar_livro(self, titulo, autor, disponibilidade):
-        novo_item = Livro(titulo, autor, disponibilidade)
-        if novo_item in self.itens:
-            item_cadastrado()
-        else:   
-            conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
-            cursor = conexao.cursor()
-            cursor.execute("""INSERT INTO itens 
-            (titulo, autor, disponibilidade) VALUES
-            (?, ?, ?)""",
-            (novo_item.titulo, novo_item.autor, novo_item.disponibilidade))
-            self.itens.append(novo_item)
-            conexao.commit()
+        conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+        cursor = conexao.cursor()
+        cursor.execute("""DELETE FROM emprestimos
+        WHERE """)
 
-    def cadastrar_revista(self, titulo, autor, disponibilidade):
-        novo_item = Revista(titulo, autor, disponibilidade)
-        if novo_item in self.itens:
-            item_cadastrado()
-        else:
-            conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
-            cursor = conexao.cursor()
-            self.itens.append(novo_item)
-            cursor.execute("""INSERT INTO itens 
-            (titulo, autor, disponibilidade) VALUES
-            (?, ?, ?)""",
-            (novo_item.titulo, novo_item.autor, novo_item.disponibilidade))
-            conexao.commit()
+    def cadastrar_livro(self, titulo, autor, disponibilidade, tipo):
+        novo_item = Livro(titulo, autor, disponibilidade, tipo)  
+        conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+        cursor = conexao.cursor()
+        cursor.execute("""INSERT INTO itens 
+        (titulo, autor, disponibilidade, tipo) VALUES
+        (?, ?, ?, ?)""",
+        (novo_item.titulo, novo_item.autor, novo_item.disponibilidade, novo_item.tipo))
+        conexao.commit()
+
+    def cadastrar_revista(self, titulo, autor, disponibilidade, tipo):
+        novo_item = Revista(titulo, autor, disponibilidade, tipo)
+        conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+        cursor = conexao.cursor()
+        cursor.execute("""INSERT INTO itens 
+        (titulo, autor, disponibilidade, tipo) VALUES
+        (?, ?, ?, ?)""",
+        (novo_item.titulo, novo_item.autor, novo_item.disponibilidade, novo_item.tipo))
+        conexao.commit()
 
     def cadastrar_usuario(self, novo_usuario):
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
@@ -154,6 +145,5 @@ class Biblioteca:
         (?, ?)""",
         (novo_usuario.nome, novo_usuario.checagem_senha))
         conexao.commit()
-        self.usuarios[novo_usuario.nome] = novo_usuario
 
 

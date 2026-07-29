@@ -6,6 +6,7 @@ import sqlite3
 
 conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
 cursor = conexao.cursor()
+cursor.execute("""ALTER TABLE emprestimos RENAME COLUMN itens_id TO id_item""")
 
 def escolha1_cadastrar_item(biblioteca_recebida):
     # itens_disponiveis()     #Exibe os ITENS disponíveis
@@ -15,7 +16,7 @@ def escolha1_cadastrar_item(biblioteca_recebida):
         if buscar_item_completo(titulo) == None:    #Impede a criação de itens iguais
             autor = insira_autor()
             disponibilidade = True
-            biblioteca_recebida.cadastrar_livro(titulo, autor, disponibilidade, "Livro") #Cria um livro
+            biblioteca_recebida.cadastrar_livro(titulo, autor, disponibilidade, "Livro") #Não cria um livro
     elif escolha == 2:
         titulo = insira_nome_revista()
         if buscar_item_completo(titulo) == None:    #Impede a criação de itens iguais
@@ -69,11 +70,14 @@ def escolha5_retirar(biblioteca_recebida):
             try:
                 item = insira_item()
                 id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
-                if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
-                    item = Livro(titulo, autor, disponibilidade, tipo)  
+                if item_disponivel(id_item) == True:
+                    if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
+                        item = Livro(titulo, autor, disponibilidade, tipo)  
+                    else:
+                        item = Revista(titulo, autor, disponibilidade, tipo)
+                    biblioteca_recebida.retirar(usuario, item) #Passando OBJETOS
                 else:
-                    item = Revista(titulo, autor, disponibilidade, tipo)
-                biblioteca_recebida.retirar(usuario, item) #Passando OBJETOS
+                    print("Item indisponivel")
             except AttributeError:
                 item_nao_encontrado()
         else:
@@ -93,14 +97,18 @@ def escolha6_devolver(biblioteca_recebida):
         senha = getpass("")
         usuario.verificar_senha(senha)
         if senha:
+            if usuario._emprestimos < 3:
                 item = insira_item()
                 id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
-                conexao.execute("""SELECT id_item FROM item WHERE""")
-                if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
-                    item = Livro(titulo, autor, disponibilidade, tipo)  
-                else:
-                    item = Revista(titulo, autor, disponibilidade, tipo)
-                biblioteca_recebida.retirar(usuario, item) #Passando OBJETOS 
+                if item_disponivel(id_item):
+                    conexao.execute("""SELECT id_item FROM item WHERE""")
+                    if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
+                        item = Livro(titulo, autor, disponibilidade, tipo)  
+                    else:
+                        item = Revista(titulo, autor, disponibilidade, tipo)
+                    biblioteca_recebida.retirar(usuario, item) #Passando OBJETOS 
+            else:
+                emprestimo_excedente()
         else:
             senha_invalida()
     except:
@@ -128,3 +136,9 @@ def buscar_item_completo(item):
         return resultado
     except TypeError:
         return None
+
+def item_disponivel(id_item):
+    cursor.execute("""SELECT disponibilidade FROM item WHERE id = ?""", (id_item,))
+    resultado = cursor.fetchone()[0]
+    if resultado == "0": #Tá indisponivel
+        return True
