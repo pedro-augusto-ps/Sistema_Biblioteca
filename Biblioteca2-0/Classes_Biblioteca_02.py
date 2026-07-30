@@ -62,6 +62,7 @@ class Usuario:
         self._emprestimos = 0
         
     def verificar_senha(self, senha_fornecida):
+        senha_fornecida = hashlib.sha256(senha_fornecida.encode('utf-8')).hexdigest()
         return senha_fornecida == self.__senha_usuario
 
     @property
@@ -107,15 +108,18 @@ class Biblioteca:
         cursor.execute("SELECT id FROM itens WHERE titulo = ?", (item.titulo,))   #Pega o id do item
         id_item = cursor.fetchone()[0]                                            #Pega o id do item
         cursor.execute("""INSERT INTO emprestimos 
-        (usuario_ID, itens_ID) VALUES
+        (id_usuario, id_item) VALUES
         (?, ?)""", (id_usuario, id_item,))  #Cria um empréstimo
         cursor.execute("""UPDATE item
         SET disponibilidade = 0     
-        WHERE id = ?""", (id_item)) 
+        WHERE id = ?""", (id_item))
+        cursor.execute("""UPDATE TABLE usuarios
+        SET emprestimos_realizados + 1 
+        WHERE id = ?""", (id_usuario)) 
         conexao.commit()    #Muda a disponibilidade do item no DB
+        conexao.close()
         #INÍCIO DA RETIRADA
-        item.disponibilidade = False    #Item não está mais disponível.
-        usuario._emprestimos += 1       #Soma um emprestimo no usuário
+
 #----------------------RETIRAR----------------------#
 
 #----------------------DEVOLUÇÃO--------------------#
@@ -128,32 +132,40 @@ class Biblioteca:
         id_item = cursor.fetchone()[0]                                             #Pega o id do item
         cursor.execute("""DELETE FROM emprestimos                                  
         WHERE (id_usuario,id_item) IN ((?, ?))""", (id_usuario, id_item))
-        conexao.commit()    #Deleta a ROW do empréstimo
+         #Deleta a ROW do empréstimo
         cursor.execute("""UPDATE item
         SET disponibilidade = 1
         WHERE id = ?""", (id_item)) #Muda a disponibilidade do item no DB
-        usuario._emprestimos -= 1   #Tira um empréstimo do OBJETO usuário
+        cursor.execute("""UPDATE TABLE usuarios
+        SET emprestimos_realizados - 1 
+        WHERE id = ?""", (id_usuario)) 
+        conexao.commit()   
+        conexao.close()
+
 #----------------------DEVOLUÇÃO--------------------#
+
     def cadastrar_livro(self, titulo, autor, disponibilidade, tipo):
         novo_item = Livro(titulo, autor, disponibilidade, tipo)  
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
-        cursor.execute("""INSERT INTO itens 
+        cursor.execute("""INSERT INTO item 
         (titulo, autor, disponibilidade, tipo) VALUES
         (?, ?, ?, ?)""",
         (novo_item.titulo, novo_item.autor, novo_item.disponibilidade, novo_item.tipo))
         conexao.commit()
+        conexao.close()
 
     def cadastrar_revista(self, titulo, autor, disponibilidade, tipo):
         novo_item = Revista(titulo, autor, disponibilidade, tipo)
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
-        cursor.execute("""INSERT INTO itens 
+        cursor.execute("""INSERT INTO item 
         (titulo, autor, disponibilidade, tipo) VALUES
         (?, ?, ?, ?)""",
         (novo_item.titulo, novo_item.autor, novo_item.disponibilidade, novo_item.tipo))
         conexao.commit()
-
+        conexao.close()
+        
     def cadastrar_usuario(self, novo_usuario):
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
@@ -162,5 +174,5 @@ class Biblioteca:
         (?, ?)""",
         (novo_usuario.nome, novo_usuario.checagem_senha))
         conexao.commit()
-
+        conexao.close()
 

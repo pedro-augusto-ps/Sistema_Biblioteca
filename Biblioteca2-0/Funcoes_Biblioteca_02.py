@@ -6,7 +6,6 @@ import sqlite3
 
 conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
 cursor = conexao.cursor()
-
 def escolha1_cadastrar_item(biblioteca_recebida):
     # itens_disponiveis()     #Exibe os ITENS disponíveis
     escolha = escolha_item()
@@ -65,8 +64,7 @@ def escolha5_retirar(biblioteca_recebida):
         usuario = Usuario(nome_usuario, senha_usuario) #Cria o objeto usuario,
         insira_senha()
         senha = getpass("")
-        usuario.verificar_senha(senha)
-        if senha:    #Senha correta, então continue
+        if usuario.verificar_senha(senha) == True: #Senha correta, então continue
             try:
                 item = insira_item()
                 id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
@@ -91,24 +89,22 @@ def escolha6_devolver(biblioteca_recebida):
     usuario = insira_usuario()
     try:
         buscar_usuario(usuario) #Busca o nome do usuário no DB, como não pode ter nomes iguais na criação, não tem conflito
-        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario) 
+        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario,) 
         usuario = Usuario(nome_usuario, senha_usuario) #Cria o objeto usuario,
         insira_senha()
         senha = getpass("")
-        usuario.verificar_senha(senha)
-        if senha:       #Senha correta, então continue
-            if usuario._emprestimos < 3:
-                item = insira_item()
-                id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
-                if item_disponivel(id_item):
-                    conexao.execute("""SELECT id_item FROM item WHERE""")
-                    if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
-                        item = Livro(titulo, autor, disponibilidade, tipo)  
-                    else:
-                        item = Revista(titulo, autor, disponibilidade, tipo)
-                    biblioteca_recebida.retirar(usuario, item) #Passando OBJETOS 
+        if usuario.verificar_senha(senha) == True:   #Senha correta, então continue
+            item = insira_item()
+            id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item,)
+            if item_disponivel(id_item):
+                conexao.execute("""SELECT id_item FROM item WHERE""")
+                if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
+                    item = Livro(titulo, autor, disponibilidade, tipo)  
+                else:
+                    item = Revista(titulo, autor, disponibilidade, tipo)
+                biblioteca_recebida.devolver(usuario, item) #Passando OBJETOS 
             else:
-                emprestimo_excedente()
+                item_indisponivel()
         else:
             senha_invalida()
     except:
@@ -139,5 +135,7 @@ def buscar_item_completo(item):
 def item_disponivel(id_item):
     cursor.execute("""SELECT disponibilidade FROM item WHERE id = ?""", (id_item,))
     resultado = cursor.fetchone()[0]
-    if resultado == "0": #Tá indisponivel
+    if resultado == "0": #0 = Não foi retirado
         return True
+    else:
+        return False

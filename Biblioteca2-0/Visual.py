@@ -1,6 +1,7 @@
 from rich import print
 from rich.table import Table
 from rich.panel import Panel  
+import sqlite3
 
 def menu_principal():
     texto = ("[bold white][1][/] Cadastrar [bold #F9DC5C]ITEM[/]\n"
@@ -13,23 +14,27 @@ def menu_principal():
     menu = Panel(texto, title="[bold green]MENU[/]")
     print(menu)
 
-# def exibir_acervo_estilizado(biblioteca_recebida):
-    # tabela = Table(title="[white]ACERVO[/]")
-    # tabela.add_column("ITEM")
-    # tabela.add_column("AUTOR")
-    # tabela.add_column("DISPONIBILIDADE")
-    # for item in biblioteca_recebida.itens:
-    #     if item.disponibilidade == True:
-    #         status = "[green bold]DISPONÍVEL[/]"
-    #     else:
-    #         status = "[red bold]INDISPONÍVEL[/]"
-    #     tabela.add_row(item.titulo, item.autor, status)
-    # print(tabela)
+def exibir_acervo_estilizado(biblioteca_recebida):
+    conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+    cursor = conexao.cursor()
+    cursor.execute("SELECT titulo, autor, disponibilidade, tipo FROM item")
+    resultado = cursor.fetchall()
+    tabela = Table(title="[white]ACERVO[/]")
+    tabela.add_column("ITEM")
+    tabela.add_column("AUTOR")
+    tabela.add_column("DISPONIBILIDADE")
 
-# def itens_disponiveis():
-#     print(f"[#F9DC5C bold]ITENS[/] disponíveis: ")
-#     print(f"[white bold][1] LIVRO[/]")
-#     print(f"[white bold][2] REVISTA[/]")
+    for informacao in resultado:
+        titulo, autor, disponibilidade, tipo = resultado
+        tabela.add_row(titulo, autor, disponibilidade, tipo)
+    print(tabela)
+    conexao.close()
+
+
+def itens_disponiveis():
+    print(f"[#F9DC5C bold]ITENS[/] disponíveis: ")
+    print(f"[white bold][1] LIVRO[/]")
+    print(f"[white bold][2] REVISTA[/]")
 
 def insira_titulo():
     print(f"[green]Insira o [/][#F9DC5C bold]TÍTULO[/]: ")
