@@ -23,10 +23,15 @@ def exibir_acervo_estilizado(biblioteca_recebida):
     tabela.add_column("ITEM")
     tabela.add_column("AUTOR")
     tabela.add_column("DISPONIBILIDADE")
-
+    tabela.add_column("TIPO")
     for informacao in resultado:
-        titulo, autor, disponibilidade, tipo = resultado
-        tabela.add_row(titulo, autor, disponibilidade, tipo)
+        titulo, autor, disponibilidade, tipo = informacao
+        titulo = f"[white bold]{titulo}[/]"
+        autor = f"[white bold]{autor}[/]"
+        tipo = f"[white bold]{tipo}[/]"
+        status = "[green]DISPONÍVEL[/]" if disponibilidade ==1 else "[red]INDISPONÍVEL[/]"
+        tabela.add_row(titulo, autor, status, tipo)
+
     print(tabela)
     conexao.close()
 

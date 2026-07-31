@@ -112,10 +112,10 @@ class Biblioteca:
         (?, ?)""", (id_usuario, id_item,))  #Cria um empréstimo
         cursor.execute("""UPDATE item
         SET disponibilidade = 0     
-        WHERE id = ?""", (id_item))
+        WHERE id = ?""", (id_item,))
         cursor.execute("""UPDATE TABLE usuarios
         SET emprestimos_realizados + 1 
-        WHERE id = ?""", (id_usuario)) 
+        WHERE id = ?""", (id_usuario,)) 
         conexao.commit()    #Muda a disponibilidade do item no DB
         conexao.close()
         #INÍCIO DA RETIRADA

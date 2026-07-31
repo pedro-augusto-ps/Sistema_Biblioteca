@@ -39,7 +39,7 @@ def escolha2_cadastrar_usuario(biblioteca_recebida):
 def escolha3_exibir_informações(biblioteca_recebida):
     usuario = insira_usuario()
     try:
-        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario)
+        id_usuario, nome_usuario, senha_usuario, emprestimos_realizados = buscar_usuario_completo(usuario)
         usuario = Usuario(nome_usuario, senha_usuario)
         insira_senha()        
         senha = getpass("")
