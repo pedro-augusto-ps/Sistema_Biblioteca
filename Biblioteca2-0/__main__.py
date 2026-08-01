@@ -8,8 +8,8 @@ biblioteca_recebida = Biblioteca()
 
 menu_principal()
 while True:
-
-        print("[white bold]Insira sua ação: [7] = MOSTRAR MENU[/]")
+    print("[white bold]Insira sua ação: [7] = MOSTRAR MENU[/]")
+    try:
         escolha = int(input(""))
         if escolha == 1:
             escolha1_cadastrar_item(biblioteca_recebida)
@@ -25,6 +25,9 @@ while True:
             escolha6_devolver(biblioteca_recebida)
         elif escolha == 7:
             menu_principal()
-
+    except TypeError:
+        print("Escolha uma opção válida!")
+    except:
+        invalido()
 
         

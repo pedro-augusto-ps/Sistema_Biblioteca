@@ -56,14 +56,20 @@ class Usuario:
     MÉTODOS: verificar_senha -> Valida a veracidade da senha e posteriormente permite
     a retirada, exibição de informações, e devolução dos itens.
     NOTA: A senha automaticamente vira um HASH SHA256 para contribuir com a segurança."""
-    def __init__(self, nome, senha_usuario):
+    def __init__(self, nome, senha_usuario, tem_hash =False):
         self._nome = nome
-        self.__senha_usuario = hashlib.sha256(senha_usuario.encode('utf-8')).hexdigest()  #Senha trasnformada em HASH de cara
+        if tem_hash == False:
+            self.__senha_usuario = hashlib.sha256(senha_usuario.encode('utf-8')).hexdigest()  #Senha trasnformada em HASH de cara
+        else:
+            self.__senha_usuario = senha_usuario
         self._emprestimos = 0
         
     def verificar_senha(self, senha_fornecida):
         senha_fornecida = hashlib.sha256(senha_fornecida.encode('utf-8')).hexdigest()
-        return senha_fornecida == self.__senha_usuario
+        if senha_fornecida == self.__senha_usuario:
+            return True
+        else:
+            return False
 
     @property
     def nome(self):
@@ -105,15 +111,15 @@ class Biblioteca:
         cursor = conexao.cursor()
         cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,)) #Pega o ID do usuário
         id_usuario = cursor.fetchone()[0]                                         #Pega o ID do usuário
-        cursor.execute("SELECT id FROM item WHERE titulo = ?", (item.titulo,))   #Pega o id do item
+        cursor.execute("SELECT id_item FROM item WHERE titulo = ?", (item.titulo,))   #Pega o id do item
         id_item = cursor.fetchone()[0]                                            #Pega o id do item
         cursor.execute("""INSERT INTO emprestimos 
         (id_usuario, id_item) VALUES
         (?, ?)""", (id_usuario, id_item,))  #Cria um empréstimo
         cursor.execute("""UPDATE item
         SET disponibilidade = 0     
-        WHERE id = ?""", (id_item,))
-        cursor.execute("""UPDATE TABLE usuarios
+        WHERE id_item = ?""", (id_item,))
+        cursor.execute("""UPDATE usuarios
         SET emprestimos_realizados = emprestimos_realizados + 1 
         WHERE id = ?""", (id_usuario,)) 
         conexao.commit()    #Muda a disponibilidade do item no DB
@@ -128,14 +134,14 @@ class Biblioteca:
         cursor = conexao.cursor()
         cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))  #Pega o ID do usuário
         id_usuario = cursor.fetchone()[0]                                          #Pega o ID do usuário
-        cursor.execute("SELECT id FROM item WHERE titulo = ?", (item.titulo,))    #Pega o id do item
+        cursor.execute("SELECT id_item FROM item WHERE titulo = ?", (item.titulo,))    #Pega o id do item
         id_item = cursor.fetchone()[0]                                             #Pega o id do item
         cursor.execute("""DELETE FROM emprestimos                                  
-        WHERE (id_usuario,id_item) IN ((?, ?))""", (id_usuario, id_item))
+        WHERE id_usuario = ? AND id_item = ?""", (id_usuario, id_item))
          #Deleta a ROW do empréstimo
         cursor.execute("""UPDATE item
         SET disponibilidade = 1
-        WHERE id = ?""", (id_item,)) #Muda a disponibilidade do item no DB
+        WHERE id_item = ?""", (id_item,)) #Muda a disponibilidade do item no DB
         cursor.execute("""UPDATE usuarios
         SET emprestimos_realizados = emprestimos_realizados - 1 
         WHERE id = ?""", (id_usuario,)) 

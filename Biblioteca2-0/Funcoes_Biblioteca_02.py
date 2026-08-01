@@ -6,8 +6,14 @@ import sqlite3
 
 conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
 cursor = conexao.cursor()
+
+# cursor.execute("DELETE FROM emprestimos")
+# cursor.execute("DELETE FROM usuarios")
+# cursor.execute("DELETE FROM item")
+# cursor.execute("DELETE FROM sqlite_sequence")
+# conexao.commit()
 def escolha1_cadastrar_item(biblioteca_recebida):
-    # itens_disponiveis()     #Exibe os ITENS disponíveis
+    itens_disponiveis()   
     escolha = escolha_item()
     if escolha == 1:
         titulo = insira_titulo()
@@ -40,9 +46,12 @@ def escolha3_exibir_informações(biblioteca_recebida):
     usuario = insira_usuario()
     try:
         id_usuario, nome_usuario, senha_usuario, emprestimos_realizados = buscar_usuario_completo(usuario)
-        cursor.execute("SELECT id_item FROM emprestimos WHERE id_usuario = ?", (id_usuario,))
-        itens_emprestados = cursor.fetchone()
-        usuario = Usuario(nome_usuario, senha_usuario)
+        cursor.execute("""SELECT titulo, autor, disponibilidade, tipo
+        FROM item
+        INNER JOIN emprestimos ON emprestimos.id_item = item.id_item
+        WHERE emprestimos.id_usuario = ?""", (id_usuario,))
+        itens_emprestados = cursor.fetchall()
+        usuario = Usuario(nome_usuario, senha_usuario, tem_hash=True)
         insira_senha()        
         senha = getpass("")
         if usuario.verificar_senha(senha) == True:  #Verifica a senha do usuário
@@ -62,8 +71,8 @@ def escolha5_retirar(biblioteca_recebida):
     usuario = insira_usuario()
     try:
         buscar_usuario(usuario) #Busca o nome do usuário no DB, como não pode ter nomes iguais na criação, não tem conflito
-        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario) #Em ordem, pega as informações do usuário
-        usuario = Usuario(nome_usuario, senha_usuario) #Cria o objeto usuario,
+        id_usuario, nome_usuario, senha_usuario, emprestimos_realizados = buscar_usuario_completo(usuario) #Em ordem, pega as informações do usuário
+        usuario = Usuario(nome_usuario, senha_usuario, tem_hash=True) #Cria o objeto usuario,
         insira_senha()
         senha = getpass("")
         if usuario.verificar_senha(senha) == True: #Senha correta, então continue
@@ -91,14 +100,14 @@ def escolha6_devolver(biblioteca_recebida):
     usuario = insira_usuario()
     try:
         buscar_usuario(usuario) #Busca o nome do usuário no DB, como não pode ter nomes iguais na criação, não tem conflito
-        id_usuario, nome_usuario, senha_usuario = buscar_usuario_completo(usuario,) 
-        usuario = Usuario(nome_usuario, senha_usuario) #Cria o objeto usuario,
+        id_usuario, nome_usuario, senha_usuario, emprestimos_realizados = buscar_usuario_completo(usuario,) 
+        usuario = Usuario(nome_usuario, senha_usuario, tem_hash=True) #Cria o objeto usuario,
         insira_senha()
         senha = getpass("")
         if usuario.verificar_senha(senha) == True:   #Senha correta, então continue
             item = insira_item()
             id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item,)
-            if item_disponivel(id_item):
+            if item_disponivel(id_item) == False:
                 if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
                     item = Livro(titulo, autor, disponibilidade, tipo)  
                 else:
@@ -134,9 +143,9 @@ def buscar_item_completo(item):
         return None
 
 def item_disponivel(id_item):
-    cursor.execute("""SELECT disponibilidade FROM item WHERE id = ?""", (id_item,))
+    cursor.execute("""SELECT disponibilidade FROM item WHERE id_item = ?""", (id_item,))
     resultado = cursor.fetchone()[0]
-    if resultado == "0": #0 = Não foi retirado
+    if resultado == 1: #0 = Não foi retirado
         return True
     else:
         return False
