@@ -3,6 +3,9 @@ from rich.table import Table
 from rich.panel import Panel  
 import sqlite3
 
+conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
+cursor = conexao.cursor()
+
 def menu_principal():
     texto = ("[bold white][1][/] Cadastrar [bold #F9DC5C]ITEM[/]\n"
     "[bold white][2][/] Cadastrar [#3185FC bold]USUÁRIO[/]\n"
@@ -15,8 +18,6 @@ def menu_principal():
     print(menu)
 
 def exibir_acervo_estilizado(biblioteca_recebida):
-    conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
-    cursor = conexao.cursor()
     cursor.execute("SELECT titulo, autor, disponibilidade, tipo FROM item")
     resultado = cursor.fetchall()
     tabela = Table(title="[white]ACERVO[/]")
@@ -95,20 +96,27 @@ def usuario_nao_encontrado():
 def usuario_cadastrado():
     print(f"[#2EC4B6 bold]USUÁRIO[/] [#2EC4B6]já cadastrado[/]")
 
-def exibir_informacoes(usuario):
+def exibir_informacoes(usuario, itens_emprestados):
     print(f"EXIBINDO INFORMAÇÕES DE(A):")
     print(f"[#2EC4B6 bold]NOME: {usuario.nome}[/]")
-    print(f"[#2EC4B6 bold]EMPRÉSTIMOS ATUAIS: {usuario._emprestimos_realizados}[/]")
+    qtd_emprestimos = cursor.execute("""SELECT emprestimos_realizados
+    FROM usuarios
+    WHERE nome = ?""", (usuario.nome,))
+    print(f"[#2EC4B6 bold]EMPRÉSTIMOS ATUAIS: {qtd_emprestimos}")
     tabela = Table(title="[white]ITENS RETIRADOS[/]")
     tabela.add_column("ITEM")
     tabela.add_column("AUTOR")
     tabela.add_column("DISPONIBILIDADE")
-    for item in usuario._itens_emprestados:
-        if item.item.disponibilidade == True:
-            status = "[green bold]DISPONÍVEL[/]"
-        else:
-            status = "[red bold]INDISPONÍVEL[/]"
-        tabela.add_row(item.item.titulo, item.item.autor, status) #item. -> emprestimo, item.item -> nome do item
+    cursor.execute("SELECT titulo, autor, disponibilidade FROM item WHERE id_item = ?", (itens_emprestados,))
+    resultado = cursor.fetchall()
+    for informacao in resultado:
+        titulo, autor, disponibilidade = informacao
+        titulo = f"[white bold]{titulo}[/]"
+        autor = f"[white bold]{autor}[/]"
+        status = "[green]DISPONÍVEL[/]" if disponibilidade ==1 else "[red]INDISPONÍVEL[/]"        
+        tabela.add_row(titulo, autor, disponibilidade)
+
+
     print(tabela)
 #USUÁRIO
 
@@ -129,3 +137,5 @@ def item_indisponivel():
 
 def item_nao_encontrado():
     print(f"[#2EC4B6 bold]ITEM[/] [#2EC4B6]não encontrado[/]")
+
+conexao.close()

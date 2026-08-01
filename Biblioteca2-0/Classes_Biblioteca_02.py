@@ -105,7 +105,7 @@ class Biblioteca:
         cursor = conexao.cursor()
         cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,)) #Pega o ID do usuário
         id_usuario = cursor.fetchone()[0]                                         #Pega o ID do usuário
-        cursor.execute("SELECT id FROM itens WHERE titulo = ?", (item.titulo,))   #Pega o id do item
+        cursor.execute("SELECT id FROM item WHERE titulo = ?", (item.titulo,))   #Pega o id do item
         id_item = cursor.fetchone()[0]                                            #Pega o id do item
         cursor.execute("""INSERT INTO emprestimos 
         (id_usuario, id_item) VALUES
@@ -114,7 +114,7 @@ class Biblioteca:
         SET disponibilidade = 0     
         WHERE id = ?""", (id_item,))
         cursor.execute("""UPDATE TABLE usuarios
-        SET emprestimos_realizados + 1 
+        SET emprestimos_realizados = emprestimos_realizados + 1 
         WHERE id = ?""", (id_usuario,)) 
         conexao.commit()    #Muda a disponibilidade do item no DB
         conexao.close()
@@ -128,17 +128,17 @@ class Biblioteca:
         cursor = conexao.cursor()
         cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))  #Pega o ID do usuário
         id_usuario = cursor.fetchone()[0]                                          #Pega o ID do usuário
-        cursor.execute("SELECT id FROM itens WHERE titulo = ?", (item.titulo,))    #Pega o id do item
+        cursor.execute("SELECT id FROM item WHERE titulo = ?", (item.titulo,))    #Pega o id do item
         id_item = cursor.fetchone()[0]                                             #Pega o id do item
         cursor.execute("""DELETE FROM emprestimos                                  
         WHERE (id_usuario,id_item) IN ((?, ?))""", (id_usuario, id_item))
          #Deleta a ROW do empréstimo
         cursor.execute("""UPDATE item
         SET disponibilidade = 1
-        WHERE id = ?""", (id_item)) #Muda a disponibilidade do item no DB
-        cursor.execute("""UPDATE TABLE usuarios
-        SET emprestimos_realizados - 1 
-        WHERE id = ?""", (id_usuario)) 
+        WHERE id = ?""", (id_item,)) #Muda a disponibilidade do item no DB
+        cursor.execute("""UPDATE usuarios
+        SET emprestimos_realizados = emprestimos_realizados - 1 
+        WHERE id = ?""", (id_usuario,)) 
         conexao.commit()   
         conexao.close()
 

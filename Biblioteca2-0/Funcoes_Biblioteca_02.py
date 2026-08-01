@@ -40,18 +40,20 @@ def escolha3_exibir_informações(biblioteca_recebida):
     usuario = insira_usuario()
     try:
         id_usuario, nome_usuario, senha_usuario, emprestimos_realizados = buscar_usuario_completo(usuario)
+        cursor.execute("SELECT id_item FROM emprestimos WHERE id_usuario = ?", (id_usuario,))
+        itens_emprestados = cursor.fetchone()
         usuario = Usuario(nome_usuario, senha_usuario)
         insira_senha()        
         senha = getpass("")
         if usuario.verificar_senha(senha) == True:  #Verifica a senha do usuário
-            exibir_informacoes(usuario)             #Exibe as informaçoes do usuário
+            exibir_informacoes(usuario, itens_emprestados)             #Exibe as informaçoes do usuário
         else:
             senha_invalida()
     except TypeError:
         usuario_nao_encontrado()        
 
-# def escolha4_exibir_acervo(bibilioteca_recebida):
-#     exibir_acervo_estilizado(bibilioteca_recebida)
+def escolha4_exibir_acervo(bibilioteca_recebida):
+    exibir_acervo_estilizado(bibilioteca_recebida)
 
 #----------------------RETIRAR----------------------#
 #FUNÇÕES DEVEM VALIDAR TUDO
@@ -97,7 +99,6 @@ def escolha6_devolver(biblioteca_recebida):
             item = insira_item()
             id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item,)
             if item_disponivel(id_item):
-                conexao.execute("""SELECT id_item FROM item WHERE""")
                 if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
                     item = Livro(titulo, autor, disponibilidade, tipo)  
                 else:
