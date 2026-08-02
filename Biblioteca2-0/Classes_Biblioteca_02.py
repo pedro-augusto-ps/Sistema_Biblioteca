@@ -5,7 +5,6 @@ from getpass import getpass
 from Visual import *
 import sqlite3
 
-
 class Item(ABC):
     """Clase ITEM, abstrata e serve para criação das SUBCLASSES livro e Revista
     Possuí um método abstrato para ser implantado em ambas.
@@ -16,17 +15,10 @@ class Item(ABC):
         self.disponibilidade = disponibilidade
         self.tipo = tipo
 
-    @abstractmethod         #Método abstrato para forçar a criaçao nas subclasses
-    def calcular_multa(self, dias_de_atraso):
-        pass
-
 class Livro(Item): 
     """Livro SUBCLASSE de item, com essa classe criamos um item para nossa biblioteca"""
     def __init__(self, titulo, autor, disponibilidade, tipo):
         super().__init__(titulo, autor, disponibilidade, tipo)
-
-    def calcular_multa(self, dias_de_atraso):
-        return dias_de_atraso * 1
 
     def __str__(self):
         if self.disponibilidade == True:
@@ -39,16 +31,6 @@ class Revista(Item):
     """Revista SUBCLASSE de item, com essa classe criamos um item para nossa biblioteca"""
     def __init__(self, titulo, autor, disponibilidade, tipo):
         super().__init__(titulo, autor, disponibilidade, tipo)
-
-    def calcular_multa(self, dias_de_atraso):
-        return dias_de_atraso * 0.50
-    
-    def __str__(self):
-        if self.disponibilidade == True:
-            status = "DISPONÍVEL"
-        else:
-            status = "INDISPONÍVEL"
-        return f"REVISTA: {self.titulo} AUTOR: {self.autor} STATUS: {status}"
      
 class Usuario:
     """Usuário que irá utilizar do sistema
@@ -109,10 +91,10 @@ class Biblioteca:
     def retirar(self, usuario, item): 
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
-        cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,)) #Pega o ID do usuário
-        id_usuario = cursor.fetchone()[0]                                         #Pega o ID do usuário
-        cursor.execute("SELECT id_item FROM item WHERE titulo = ?", (item.titulo,))   #Pega o id do item
-        id_item = cursor.fetchone()[0]                                            #Pega o id do item
+        cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))   #Pega o ID do usuário
+        id_usuario = cursor.fetchone()[0]                                           #Pega o ID do usuário
+        cursor.execute("SELECT id_item FROM item WHERE titulo = ?", (item.titulo,)) #Pega o id do item
+        id_item = cursor.fetchone()[0]                                              #Pega o id do item
         cursor.execute("""INSERT INTO emprestimos 
         (id_usuario, id_item) VALUES
         (?, ?)""", (id_usuario, id_item,))  #Cria um empréstimo
@@ -125,17 +107,16 @@ class Biblioteca:
         conexao.commit()    #Muda a disponibilidade do item no DB
         conexao.close()
         #INÍCIO DA RETIRADA
-
 #----------------------RETIRAR----------------------#
 
 #----------------------DEVOLUÇÃO--------------------#
     def devolver(self, usuario, item):
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
-        cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))  #Pega o ID do usuário
-        id_usuario = cursor.fetchone()[0]                                          #Pega o ID do usuário
-        cursor.execute("SELECT id_item FROM item WHERE titulo = ?", (item.titulo,))    #Pega o id do item
-        id_item = cursor.fetchone()[0]                                             #Pega o id do item
+        cursor.execute("SELECT id FROM usuarios WHERE nome = ?", (usuario.nome,))    #Pega o ID do usuário
+        id_usuario = cursor.fetchone()[0]                                            #Pega o ID do usuário
+        cursor.execute("SELECT id_item FROM item WHERE titulo = ?", (item.titulo,))  #Pega o id do item
+        id_item = cursor.fetchone()[0]                                               #Pega o id do item
         cursor.execute("""DELETE FROM emprestimos                                  
         WHERE id_usuario = ? AND id_item = ?""", (id_usuario, id_item))
          #Deleta a ROW do empréstimo
@@ -147,11 +128,10 @@ class Biblioteca:
         WHERE id = ?""", (id_usuario,)) 
         conexao.commit()   
         conexao.close()
-
 #----------------------DEVOLUÇÃO--------------------#
 
     def cadastrar_livro(self, titulo, autor, disponibilidade, tipo):
-        novo_item = Livro(titulo, autor, disponibilidade, tipo)  
+        novo_item = Livro(titulo, autor, disponibilidade, tipo)  #Cria o objeto Livro
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
         cursor.execute("""INSERT INTO item 
@@ -162,7 +142,7 @@ class Biblioteca:
         conexao.close()
 
     def cadastrar_revista(self, titulo, autor, disponibilidade, tipo):
-        novo_item = Revista(titulo, autor, disponibilidade, tipo)
+        novo_item = Revista(titulo, autor, disponibilidade, tipo) #Cria o objeto Revista
         conexao = sqlite3.connect("Banco_biblioteca/biblioteca.db")
         cursor = conexao.cursor()
         cursor.execute("""INSERT INTO item 

@@ -3,8 +3,6 @@ from rich.table import Table
 from rich.panel import Panel  
 import sqlite3
 
-
-
 def menu_principal():
     texto = ("[bold white][1][/] Cadastrar [bold #F9DC5C]ITEM[/]\n"
     "[bold white][2][/] Cadastrar [#3185FC bold]USUÁRIO[/]\n"
@@ -37,7 +35,6 @@ def exibir_acervo_estilizado(biblioteca_recebida):
     print(tabela)
     conexao.close()
 
-
 def itens_disponiveis():
     print(f"[#F9DC5C bold]ITENS[/] disponíveis: ")
     print(f"[white bold][1] LIVRO[/]")
@@ -62,7 +59,7 @@ def insira_senha():
     print(f"[#F3A712]Insira a [bold]SENHA:[/]")
 #SENHAS
 
-#CADASTRO DE ITENS/QUAL ITEM FORNECER
+
 def insira_item():
     print(f"[white]Insira o [/][#F9DC5C bold]ITEM[/]: ")
     item = input("")
@@ -78,7 +75,7 @@ def escolha_item():
     item = int(input(""))
     return item
 
-#CADASTRO DE ITENS/QUAL ITEM FORNECER
+
 
 
 def invalido():
@@ -122,14 +119,12 @@ def exibir_informacoes(usuario, itens_emprestados):
     conexao.close()
 #USUÁRIO
 
-#EMPRESTIMO
-
 def emprestimo_excedente():
     print(f"[#FF0000 bold]Limite de EMPRÉSTIMOS[/] [#FF0000]atingido[/]")
 
 def emprestimo_nao_encontrado():
     print(f"[#FF0000 bold]EMPRÉSTIMO[/] [#FF0000]não encontrado[/]")
-#EMPRESTIMO
+
 
 def item_cadastrado():
     print(f"[#F9DC5C bold]ITEM[/] já cadastrado")
