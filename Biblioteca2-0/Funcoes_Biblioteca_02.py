@@ -97,6 +97,7 @@ def escolha5_retirar(biblioteca_recebida):
 
 #----------------------DEVOLUÇÃO--------------------#
 def escolha6_devolver(biblioteca_recebida):
+    exibir_informacoes()
     usuario = insira_usuario()
     try:
         buscar_usuario(usuario) #Busca o nome do usuário no DB, como não pode ter nomes iguais na criação, não tem conflito

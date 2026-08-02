@@ -5,27 +5,26 @@ import time
 
 biblioteca_recebida = Biblioteca()
 
-
 menu_principal()
 while True:
     print("[white bold]Insira sua ação: [7] = MOSTRAR MENU[/]")
     try:
-        escolha = int(input(""))
-        if escolha == 1:
+        escolha = input("").strip()
+        if escolha == "1":
             escolha1_cadastrar_item(biblioteca_recebida)
-        elif escolha == 2:
+        elif escolha == "2":
             escolha2_cadastrar_usuario(biblioteca_recebida)
-        elif escolha == 3:
+        elif escolha == "3":
             escolha3_exibir_informações(biblioteca_recebida)
-        elif escolha == 4:
+        elif escolha == "4":
             exibir_acervo_estilizado(biblioteca_recebida)
-        elif escolha == 5:
+        elif escolha == "5":
             escolha5_retirar(biblioteca_recebida)
-        elif escolha == 6:
+        elif escolha == "6":
             escolha6_devolver(biblioteca_recebida)
-        elif escolha == 7:
+        elif escolha == "7":
             menu_principal()
-    except TypeError:
+    except ValueError:
         print("Escolha uma opção válida!")
     except:
         invalido()
