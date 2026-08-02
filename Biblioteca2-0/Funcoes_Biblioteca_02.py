@@ -54,8 +54,8 @@ def escolha3_exibir_informações(biblioteca_recebida):
         usuario = Usuario(nome_usuario, senha_usuario, tem_hash=True)
         insira_senha()        
         senha = getpass("")
-        if usuario.verificar_senha(senha) == True:  #Verifica a senha do usuário
-            exibir_informacoes(usuario, itens_emprestados)             #Exibe as informaçoes do usuário
+        if usuario.verificar_senha(senha) == True:              #Verifica a senha do usuário
+            exibir_informacoes(usuario, itens_emprestados)      #Exibe as informaçoes do usuário
         else:
             senha_invalida()
     except TypeError:
@@ -65,7 +65,6 @@ def escolha4_exibir_acervo(bibilioteca_recebida):
     exibir_acervo_estilizado(bibilioteca_recebida)
 
 #----------------------RETIRAR----------------------#
-#FUNÇÕES DEVEM VALIDAR TUDO
 def escolha5_retirar(biblioteca_recebida):
     # exibir_acervo_estilizado(biblioteca_recebida)
     usuario = insira_usuario()
@@ -76,8 +75,9 @@ def escolha5_retirar(biblioteca_recebida):
         insira_senha()
         senha = getpass("")
         if usuario.verificar_senha(senha) == True: #Senha correta, então continue
+            exibir_acervo_estilizado(biblioteca_recebida)
+            item = insira_item()
             try:
-                item = insira_item()
                 id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item)
                 if item_disponivel(id_item) == True:
                     if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
@@ -86,8 +86,8 @@ def escolha5_retirar(biblioteca_recebida):
                         item = Revista(titulo, autor, disponibilidade, tipo)
                     biblioteca_recebida.retirar(usuario, item) #Passando OBJETOS
                 else:
-                    print("Item indisponivel")
-            except AttributeError:
+                    item_indisponivel()
+            except:
                 item_nao_encontrado()
         else:
             senha_invalida()
@@ -97,23 +97,31 @@ def escolha5_retirar(biblioteca_recebida):
 
 #----------------------DEVOLUÇÃO--------------------#
 def escolha6_devolver(biblioteca_recebida):
-    exibir_informacoes()
     usuario = insira_usuario()
     try:
         buscar_usuario(usuario) #Busca o nome do usuário no DB, como não pode ter nomes iguais na criação, não tem conflito
-        id_usuario, nome_usuario, senha_usuario, emprestimos_realizados = buscar_usuario_completo(usuario,) 
+        id_usuario, nome_usuario, senha_usuario, emprestimos_realizados = buscar_usuario_completo(usuario,)
+        cursor.execute("""SELECT titulo, autor, disponibilidade, tipo
+        FROM item
+        INNER JOIN emprestimos ON emprestimos.id_item = item.id_item
+        WHERE emprestimos.id_usuario = ?""", (id_usuario,))
+        itens_emprestados = cursor.fetchall()
         usuario = Usuario(nome_usuario, senha_usuario, tem_hash=True) #Cria o objeto usuario,
         insira_senha()
         senha = getpass("")
         if usuario.verificar_senha(senha) == True:   #Senha correta, então continue
+            exibir_informacoes(usuario, itens_emprestados)
             item = insira_item()
-            id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item,)
-            if item_disponivel(id_item) == False:
-                if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
-                    item = Livro(titulo, autor, disponibilidade, tipo)  
-                else:
-                    item = Revista(titulo, autor, disponibilidade, tipo)
-                biblioteca_recebida.devolver(usuario, item) #Passando OBJETOS 
+            try:
+                id_item, titulo, autor, disponibilidade, tipo = buscar_item_completo(item,)
+                if item_disponivel(id_item) == False:
+                    if tipo == "Livro":  #Para não criar um objeto item, pensei em usar um IF para verificar o tipo antes de criar
+                        item = Livro(titulo, autor, disponibilidade, tipo)  
+                    else:
+                        item = Revista(titulo, autor, disponibilidade, tipo)
+                    biblioteca_recebida.devolver(usuario, item) #Passando OBJETOS 
+            except:
+                item_nao_encontrado()
             else:
                 item_indisponivel()
         else:

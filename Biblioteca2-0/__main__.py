@@ -26,7 +26,6 @@ while True:
             menu_principal()
     except ValueError:
         print("Escolha uma opção válida!")
-    except:
-        invalido()
+
 
         
