@@ -132,10 +132,11 @@ def escolha6_devolver(biblioteca_recebida):
                     else:
                         item = Revista(titulo, autor, disponibilidade, tipo)
                     biblioteca_recebida.devolver(usuario, item) #Passando OBJETOS 
+                else:
+                    item_indisponivel()
             except:
                 item_nao_encontrado()
-            else:
-                item_indisponivel()
+
         else:
             senha_invalida()
     except:
