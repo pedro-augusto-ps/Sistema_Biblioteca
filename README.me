@@ -1,6 +1,6 @@
 # BIBLIOTECA em Python
 
-Sistema de gerenciamento de biblioteca via terminal, com cadastro de itens, usuários, empréstimos, devoluções e persistência de dados. Este é o projeto mais completo que desenvolvi até agora.
+Sistema de gerenciamento de biblioteca via terminal, com cadastro de itens, usuários, empréstimos, devoluções e persistência de dados.
 
 ## OQUE FAZ?
 
@@ -21,26 +21,27 @@ Sistema de gerenciamento de biblioteca via terminal, com cadastro de itens, usu�
 
 ## SEGURANÇA
 
-- A senha nunca é salva em texto puro, é transformada em HASH SHA256 de início
-- GETPASS para proteger a digitação no terminal
-- Validação antes de retirar e devolver
+- A senha nunca é salva em texto puro, é transformada em HASH SHA256 de início.
+- GETPASS para proteger a digitação no terminal.
+- Validação antes de retirar e devolver.
 
 ## DADOS
 
-O maior desafio de todo o código, implementar o JSON
-Confesso que tive que parar e estudar, completamente novo para mim,
-e necessitei ajuda da IA para criar o caminho ABSOLUTO
-
-
+Antigamente, o projeto usava JSON para armazenar os dados
+Porém comecei a estudar Banco de Dados por conta prória e decide expandir esse projeto
+SQLITE3 foi o DB escolhido.
 
 ## OQUE EU APRENDI?
 
-- Programação Orientada a Objetos
-- Tratamento de erros
-- Como salvar e ler arquivos utilizando JSON, de longe o mais desafiador, pois eu tinha escrito todo o código e precisei fazer muitas alterações para conseguir utilizar a sintaxe semelhando a um "DICT" do JSON para aceitar meus OBJETOS
-- Separação em módulos
-- TECNOLOGIAS: RICH, HASHLIB, GETPASS, JSON
+- Programação Orientada a Objetos, consolidei os conceitos vistos em videoaulas.
+- Tratamento de erros.
+- Consegui por em prática as ferramentas de Banco de Dados que vi em vídeoaulas,
+Fazer as QUERYS e buscar através do DB, de longe o mais desafiador foi a desfragmentação
+dos objetos para salvar no DB, descobri que para isso existe ORMs.
+- Separação em módulos.
+- TECNOLOGIAS: RICH, HASHLIB, GETPASS, SQLITE3.
 
 
-
+'
 > Estou constantemente aprendendo e evoluindo, OBRIGADO por visitar! 
+'
